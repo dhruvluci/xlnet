@@ -79,6 +79,7 @@ flags.DEFINE_integer("num_core_per_host", default=8,
       help="8 for TPU v2 and v3-8, 16 for larger TPU v3 pod. In the context "
       "of GPU training, it refers to the number of GPUs used.")
 flags.DEFINE_string("tpu_job_name", default=None, help="TPU worker job name.")
+flags.DEFINE_string("tpu", default=None, help="TPU name.")
 flags.DEFINE_string("tpu_address", default=None, help="TPU name.")
 flags.DEFINE_string("tpu_zone", default=None, help="TPU zone.")
 flags.DEFINE_string("gcp_project", default=None, help="gcp project.")
