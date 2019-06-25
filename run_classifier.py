@@ -4,7 +4,7 @@ from __future__ import print_function
 
 from os.path import join
 from absl import flags
-from utils import preprocess
+#from utils import preprocess
 import os
 import sys
 import csv
