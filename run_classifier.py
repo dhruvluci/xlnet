@@ -386,7 +386,7 @@ class StsbProcessor(GLUEProcessor):
 
       # there are some incomplete lines in QNLI
       if len(line) <= a_column:
-        tf.logging.warning('Incomplete line, ignored.')
+        #tf.logging.warning('Incomplete line, ignored.')
         continue
       text_a = line[a_column]
 
