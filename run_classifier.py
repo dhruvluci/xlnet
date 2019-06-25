@@ -79,7 +79,7 @@ flags.DEFINE_integer("num_core_per_host", default=8,
       help="8 for TPU v2 and v3-8, 16 for larger TPU v3 pod. In the context "
       "of GPU training, it refers to the number of GPUs used.")
 flags.DEFINE_string("tpu_job_name", default=None, help="TPU worker job name.")
-flags.DEFINE_string("tpu", default=None, help="TPU name.")
+flags.DEFINE_string("tpu_address", default=None, help="TPU name.")
 flags.DEFINE_string("tpu_zone", default=None, help="TPU zone.")
 flags.DEFINE_string("gcp_project", default=None, help="gcp project.")
 flags.DEFINE_string("master", default=None, help="master")
@@ -675,6 +675,18 @@ def main(_):
         "At least one of `do_train`, `do_eval, `do_predict` or "
         "`do_submit` must be True.")
 
+  tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(FLAGS.tpu_address)
+  is_per_host = tf.contrib.tpu.InputPipelineConfig.PER_HOST_V2
+  run_config = tf.contrib.tpu.RunConfig(
+      cluster=tpu_cluster_resolver,
+      model_dir=FLAGS.output_dir,
+      save_checkpoints_steps=FLAGS.iterations,
+      keep_checkpoint_max=20,
+      tpu_config=tf.contrib.tpu.TPUConfig(
+          iterations_per_loop=FLAGS.iterations,
+          num_shards=8,
+          per_host_input_for_training=is_per_host))
+
   if not tf.gfile.Exists(FLAGS.output_dir):
     tf.gfile.MakeDirs(FLAGS.output_dir)
 
@@ -778,9 +790,17 @@ def main(_):
       if filename.endswith(".index"):
         ckpt_name = filename[:-6]
         cur_filename = join(FLAGS.model_dir, ckpt_name)
-        global_step = int(cur_filename.split("-")[-1])
-        tf.logging.info("Add {} to eval list.".format(cur_filename))
-        steps_and_files.append([global_step, cur_filename])
+        try:
+            tf.logging.info("Add {} to eval list.".format(cur_filename))	            
+            global_step = int(cur_filename.split("-")[-1])
+            steps_and_files.append([global_step, cur_filename])	            
+            #tf.logging.info("Add {} to eval list.".format(cur_filename))
+            #steps_and_files.append([global_step, cur_filename])
+        except Exception:
+            print(cur_filename+" skipped")
+        #global_step = int(cur_filename.split("-")[-1])
+        #tf.logging.info("Add {} to eval list.".format(cur_filename))
+        #steps_and_files.append([global_step, cur_filename])
     steps_and_files = sorted(steps_and_files, key=lambda x: x[0])
 
     # Decide whether to evaluate all ckpts
